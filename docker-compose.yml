@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  app:
+    image: 'suleymanbolat/k8slearning:postservice'
+    build:
+      context: .
+    container_name: postserviceapp
+    depends_on:
+      - db
+    environment:
+      - dburl=jdbc:postgresql://localhost:5433/posts
+      - dbuser=dbuser
+      - SPRING_DATASOURCE_PASSWORD=12345
+
+  db:
+    image: 'postgres:latest'
+    container_name: db
+    environment:
+      - POSTGRES_DB=posts
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=12345
+    expose:
+      - 5433:5432
