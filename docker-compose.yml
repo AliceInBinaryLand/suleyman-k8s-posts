@@ -1,4 +1,4 @@
-version: '2'
+version: '3.1'
 
 services:
   app:
@@ -9,16 +9,20 @@ services:
     depends_on:
       - db
     environment:
-      - dburl=jdbc:postgresql://localhost:5433/posts
+      - dburl=jdbc:postgresql://postdb:5432/posts
       - dbuser=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
+    ports:
+      - "8081:8081"
+
+
 
   db:
     image: 'postgres:latest'
-    container_name: db
+    container_name: postdb
     environment:
       - POSTGRES_DB=posts
       - POSTGRES_USER=dbuser
       - POSTGRES_PASSWORD=12345
-    expose:
-      - 5433:5432
+    ports:
+      - "5433:5432"

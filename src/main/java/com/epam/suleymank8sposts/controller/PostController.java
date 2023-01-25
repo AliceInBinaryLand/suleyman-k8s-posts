@@ -19,7 +19,7 @@ public class PostController {
     PostRepository postRepository;
 
     private RestTemplate restTemplate;
-    private static  String USER_SERVICE_URL = "http://localhost:8080/users/";
+    private static  String USER_SERVICE_URL = "http://userserviceapp:8080/users/";
 
     @PostMapping(path = "/posts")
     public ResponseEntity<Post> save(@RequestBody Post post){
