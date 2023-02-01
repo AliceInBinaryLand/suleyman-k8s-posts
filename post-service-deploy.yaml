@@ -29,8 +29,6 @@ metadata:
 data:
   # property-like keys; each key maps to a simple value
   dburl: "jdbc:postgresql://post-db-service:5432/posts"
-  dbuser: "dbuser"
-  dbpassword: "12345"
   userserviceurl: "http://user-app-service:8080/users/"
 ---
 apiVersion: apps/v1
@@ -55,6 +53,10 @@ spec:
           name: postservice
           ports:
             - containerPort: 8081
+          volumeMounts:
+            - name: db-credentials
+              mountPath: "/etc/db-credentials"
+              readOnly: true
           env:
             - name: dburl
               valueFrom:
@@ -63,20 +65,23 @@ spec:
                   key: dburl
             - name: dbuser
               valueFrom:
-                configMapKeyRef:
-                  name: post-app-config
-                  key: dbuser
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
             - name: dbpassword
               valueFrom:
-                configMapKeyRef:
-                  name: post-app-config
-                  key: dbpassword
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
             - name: userserviceurl
               valueFrom:
                 configMapKeyRef:
                   name: post-app-config
                   key: userserviceurl
-
+      volumes:
+        - name: db-credentials
+          secret:
+            secretName: db-credentials
 
 
 

@@ -28,8 +28,6 @@ metadata:
   namespace: k8s-program
 data:
   POSTGRES_DB: "posts"
-  POSTGRES_USER: "dbuser"
-  POSTGRES_PASSWORD: "12345"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -53,6 +51,10 @@ spec:
           name: postgres
           ports:
             - containerPort: 5432
+          volumeMounts:
+            - name: db-credentials
+              mountPath: "/etc/db-credentials"
+              readOnly: true
           env:
             - name: POSTGRES_DB
               valueFrom:
@@ -61,15 +63,18 @@ spec:
                   key: POSTGRES_DB
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
-                  name: post-db-config
-                  key: POSTGRES_USER
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
-                configMapKeyRef:
-                  name: post-db-config
-                  key: POSTGRES_PASSWORD
-
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
+      volumes:
+        - name: db-credentials
+          secret:
+            secretName: db-credentials
 
 
 
