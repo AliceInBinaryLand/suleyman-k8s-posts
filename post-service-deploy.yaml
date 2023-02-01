@@ -1,0 +1,83 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: k8s-program
+  labels:
+    name: k8s-program
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-app-service
+  labels:
+    app: post-app-service
+  namespace: k8s-program
+spec:
+  type: NodePort
+  ports:
+    - port: 8081
+  selector:
+    app: post-app
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-app-config
+  labels:
+    name: post-app-config
+  namespace: k8s-program
+data:
+  # property-like keys; each key maps to a simple value
+  dburl: "jdbc:postgresql://post-db-service:5432/posts"
+  dbuser: "dbuser"
+  dbpassword: "12345"
+  userserviceurl: "http://user-app-service:8080/users/"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-app
+  labels:
+    app: post-app
+  namespace: k8s-program
+spec:
+  selector:
+    matchLabels:
+      app: post-app
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: post-app
+    spec:
+      containers:
+        - image: suleymanbolat/k8slearning:postservicelatest
+          name: postservice
+          ports:
+            - containerPort: 8081
+          env:
+            - name: dburl
+              valueFrom:
+                configMapKeyRef:
+                  name: post-app-config
+                  key: dburl
+            - name: dbuser
+              valueFrom:
+                configMapKeyRef:
+                  name: post-app-config
+                  key: dbuser
+            - name: dbpassword
+              valueFrom:
+                configMapKeyRef:
+                  name: post-app-config
+                  key: dbpassword
+            - name: userserviceurl
+              valueFrom:
+                configMapKeyRef:
+                  name: post-app-config
+                  key: userserviceurl
+
+
+
+
+

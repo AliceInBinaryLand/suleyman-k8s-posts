@@ -1,0 +1,76 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: k8s-program
+  labels:
+    name: k8s-program
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-db-service
+  labels:
+    app: post-db-service
+  namespace: k8s-program
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+  selector:
+    app: post-db
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-db-config
+  labels:
+    name: post-db-config
+  namespace: k8s-program
+data:
+  POSTGRES_DB: "posts"
+  POSTGRES_USER: "dbuser"
+  POSTGRES_PASSWORD: "12345"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-db
+  labels:
+    app: post-db
+  namespace: k8s-program
+spec:
+  selector:
+    matchLabels:
+      app: post-db
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: post-db
+    spec:
+      containers:
+        - image: postgres:latest
+          name: postgres
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: post-db-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: post-db-config
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: post-db-config
+                  key: POSTGRES_PASSWORD
+
+
+
+
+

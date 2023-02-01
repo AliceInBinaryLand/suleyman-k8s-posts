@@ -3,7 +3,9 @@ package com.epam.suleymank8sposts.controller;
 
 import com.epam.suleymank8sposts.model.Post;
 import com.epam.suleymank8sposts.repository.PostRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,8 @@ public class PostController {
     PostRepository postRepository;
 
     private RestTemplate restTemplate;
-    private static  String USER_SERVICE_URL = "http://userserviceapp:8080/users/";
+    @Value("${userserviceurl}")
+    private String USER_SERVICE_URL;
 
     @PostMapping(path = "/posts")
     public ResponseEntity<Post> save(@RequestBody Post post){
@@ -67,8 +70,9 @@ public class PostController {
             Optional<Post> postRecord = postRepository.findById(id);
             if(postRecord.isPresent()){
                 post.setId(id);
+                post.setPostedAt(new Date());
                 postRepository.save(post);
-                return  new ResponseEntity<>(null , HttpStatus.OK);
+                return  new ResponseEntity<>(post , HttpStatus.OK);
             }else{
                 return new ResponseEntity( null , HttpStatus.NOT_FOUND);
             }

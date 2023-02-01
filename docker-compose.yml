@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   app:
-    image: 'suleymanbolat/k8slearning:postservice'
+    image: 'suleymanbolat/k8slearning:postservicelatest'
     build:
       context: .
     container_name: postserviceapp
