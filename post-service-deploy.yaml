@@ -13,7 +13,7 @@ metadata:
     app: post-app-service
   namespace: k8s-program
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 8081
   selector:
