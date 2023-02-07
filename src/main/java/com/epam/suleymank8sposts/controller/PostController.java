@@ -79,4 +79,9 @@ public class PostController {
         }
 
     }
+
+    @GetMapping(path = "/healthCheck")
+    public ResponseEntity healthCheck(){
+        return new ResponseEntity(null , HttpStatus.OK);
+    }
 }

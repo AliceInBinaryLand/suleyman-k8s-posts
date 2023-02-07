@@ -27,7 +27,6 @@ metadata:
     name: post-app-config
   namespace: k8s-program
 data:
-  # property-like keys; each key maps to a simple value
   dburl: "jdbc:postgresql://post-db-service:5432/posts"
   userserviceurl: "http://user-app-service:8080/users/"
 ---
@@ -53,6 +52,22 @@ spec:
           name: postservice
           ports:
             - containerPort: 8081
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            httpGet:
+              scheme: HTTP
+              path: /healthCheck
+              port: 8081
+          readinessProbe:
+            initialDelaySeconds: 2
+            periodSeconds: 2
+            timeoutSeconds: 2
+            httpGet:
+              scheme: HTTP
+              path: /healthCheck
+              port: 8081
           volumeMounts:
             - name: db-credentials
               mountPath: "/etc/db-credentials"
