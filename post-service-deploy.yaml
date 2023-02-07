@@ -42,13 +42,18 @@ spec:
     matchLabels:
       app: post-app
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2 # how many pods we can add at a time
+      maxUnavailable: 0  # maxUnavailable define how many pods can be unavailable during the rolling update
   template:
     metadata:
       labels:
         app: post-app
     spec:
       containers:
-        - image: suleymanbolat/k8slearning:postservicelatest
+        - image: suleymanbolat/k8slearning:postservicewithtopic
           name: postservice
           ports:
             - containerPort: 8081
@@ -61,7 +66,7 @@ spec:
               path: /healthCheck
               port: 8081
           readinessProbe:
-            initialDelaySeconds: 2
+            initialDelaySeconds: 5
             periodSeconds: 2
             timeoutSeconds: 2
             httpGet:

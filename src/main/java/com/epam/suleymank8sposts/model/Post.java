@@ -22,4 +22,7 @@ public class Post {
 
     @Column
     private Date postedAt;
+
+    @Column
+    private String topic;
 }
