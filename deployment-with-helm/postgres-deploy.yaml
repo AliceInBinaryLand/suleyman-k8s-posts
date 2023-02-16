@@ -61,7 +61,7 @@ spec:
       storage: 100M
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: post-db
   labels:

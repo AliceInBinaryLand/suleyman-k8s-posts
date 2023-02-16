@@ -1,0 +1,28 @@
+version: '3.1'
+
+services:
+  app:
+    image: 'suleymanbolat/k8slearning:postservicelatest'
+    build:
+      context: .
+    container_name: postserviceapp
+    depends_on:
+      - db
+    environment:
+      - dburl=jdbc:postgresql://postdb:5432/posts
+      - dbuser=dbuser
+      - SPRING_DATASOURCE_PASSWORD=12345
+    ports:
+      - "8081:8081"
+
+
+
+  db:
+    image: 'postgres:latest'
+    container_name: postdb
+    environment:
+      - POSTGRES_DB=posts
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=12345
+    ports:
+      - "5433:5432"

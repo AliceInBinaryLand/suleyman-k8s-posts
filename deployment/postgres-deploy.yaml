@@ -1,0 +1,131 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: k8s-program
+  labels:
+    name: k8s-program
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-db-service
+  labels:
+    app: post-db-service
+  namespace: k8s-program
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+  selector:
+    app: post-db
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-db-config
+  labels:
+    name: post-db-config
+  namespace: k8s-program
+data:
+  POSTGRES_DB: "posts"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: post-db-persistent-volume
+  labels:
+    type: local
+    namespace: k8s-program
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/postdb/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: post-db
+  name: post-db-pv-claim
+  namespace: k8s-program
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: post-db
+  labels:
+    app: post-db
+  namespace: k8s-program
+spec:
+  selector:
+    matchLabels:
+      app: post-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: post-db
+    spec:
+      containers:
+        - image: postgres:latest
+          name: postgres
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: db-credentials
+              mountPath: "/etc/db-credentials"
+              readOnly: true
+            - name: post-db-pv-claim
+              mountPath: "/var/lib/postgresql/data"
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: post-db-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
+      volumes:
+        - name: db-credentials
+          secret:
+            secretName: db-credentials
+        - name: post-db-pv-claim
+          persistentVolumeClaim:
+            claimName: post-db-pv-claim
+
+
+
+
